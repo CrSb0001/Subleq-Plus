@@ -1,0 +1,66 @@
+# First 47 fibonacci numbers starting from 0 in Subleq+, those being
+# the fibonacci numbers that fit into an 8-byte integer type.
+# Requires the use of the --print-i command line option.
+
+#######################
+
+# Start loop by printing .C
+Fibonacci: C !
+
+# If we have printed the first 47 fibonacci numbers, halt the program.
+inc FibNumbersPrinted
+FibNumbersPrinted PrintFibUntil !
+
+# Reset the .PrintFibUntil variable since we subtract from it
+# every loop.
+PrintFibUntil
+_PrintFibUntil PrintFibUntil
+
+
+# Move .B to .A
+A
+B _zero
+_zero A
+_zero
+
+# Move .C to .B
+B
+C _zero
+_zero B
+_zero
+
+# Move (.A + .B) to .C
+C
+A _zero
+B _zero
+_zero C
+_zero
+
+# Loop back to label Fibonacci
+zero zero Fibonacci
+
+#######################
+# Literals in memory
+
+
+# .A and .B are registers meant to hold
+# the previous 2 fibonacci numbers to calculate .C,
+# the register that gets printed at each step.
+.A: 0
+.B: 1
+.C: 0
+
+# .FibNumbersPrinted represents how many fibonacci numbers
+# we have printed thus far.
+.FibNumbersPrinted: 0
+.PrintFibUntil: 47
+._PrintFibUntil: -47
+
+
+# .inc: used as `inc [literal]` to increment the value of a memory literal.
+# .zero: 0
+# ._zero: register used to help with adding values to different
+#         registers in memory
+.inc: -1
+.zero: 0
+._zero: 0
