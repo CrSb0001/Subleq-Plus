@@ -8,76 +8,61 @@
 # And maybe watch   https://www.youtube.com/watch?v=FvwcRaE9yxc
 
 import sys
-import os
-from subleqp_parser import SubleqpParser
-from subleqp_vm import SubleqpVM
+
+import subleqp_parser
+import subleqp_vm
+
 try:
     from getch import getch, getche         # Linux
 except ImportError:
-    from msvcrt import getch, getche        # Windows
+    try:
+        from msvcrt import getch, getche        # Windows
+    except ImportError:
+        getch, getche = input, input
 
 
-def Write_slc(slc_file, mem):
+def write_slc(slc_file, mem):
     pc = 0
-    maxpc = len(mem) - 1
-    while pc <= maxpc:
-        a = mem[pc]
-        b = 0
-        c = 0
-        if pc+1 <= maxpc:
-            b = mem[pc+1]
-        if pc+2 <= maxpc:
-            c = mem[pc+2]
-        slc_file.write('{} {} {}\n'.format(a, b, c))
+    mx_pc = len(mem) - 1
+    while pc <= mx_pc:
+        a, b, c = mem[pc], 0, 0
+        if pc < mx_pc:
+            b = mem[pc + 1]
+        
+        if pc + 1 < mx_pc:
+            c = mem[pc + 2]
+        
+        slc_file.write(f"{a} {b} {c}\n")
         pc += 3
 
 
-def Subleqp(args):
-    try:
-        sla_name = args[0]
-        slc_name = None
-        if len(args) > 1:
-            slc_name = args[1]
-        parser = SubleqpParser()
-        mem = []
-        with open(sla_name, "r") as sla_file:
-            raw = sla_file.read()
-            mem = parser.parse(raw)
-            sla_file.close()
-        if  slc_name != None:
-            with open(slc_name, "w") as slc_file:
-                Write_slc(slc_file, mem)
-                slc_file.close()
-        SubleqpVM.execute(mem)
-    except(ValueError, IndexError):
-        print("I just don't know what went wrong!\n")
+def write_subleqp(src_file, dest_file, /, flags = ["--print-c"]):
+    parser = subleqp_parser.SubleqpParser()
+    mem = []
+    with open(src_file, "r") as sla_file:
+        raw = sla_file.read()
+        mem = parser.parse(raw)
         sla_file.close()
+    
+    with open(dest_file, "w") as slc_file:
+        write_slc(slc_file, mem)
+        slc_file.close()
+    
+    subleqp_vm.SubleqpVM.execute(mem)
 
 def main(args):
-    try:
-        print()
-        if len(args) == 1:
-            Subleqp(args)
-        elif len(args) == 2:
-            if os.path.isfile(args[1]):
-                print(args[1], "exists.  Overwrite? ", end="", flush=True)
-                answer = getche()
-                if answer in ["y", "Y"]:
-                    print()
-                    print(args[1], "replaced \n\n", flush=True)
-                    Subleqp(args)
-                else:
-                    print()
-                    print(args[1], "retained \n\n", flush=True)
-                    Subleqp([args[0]])
-            else:
-                print("creating", args[1], "\n\n", flush=True)
-                Subleqp(args)
-        else:
-            print("usage: python subleqp.py infile.sla [outfile.slc]\n")
-    except FileNotFoundError:
-        print("< *Peter_Lorre* >\nYou eediot!  What were you theenking?\nTry it again, but thees time with a valid file name!\n</ *Peter_Lorre* >\n")
-        print("usage: python subleqp.py infile.sla [outfile.slc]\n")
+    # Usage: subleqp.py src_file dest_file [--print-c | --print-i]
+    flags = []
+    if len(args) >= 3:
+        if len(args) == 4:
+            if args[3].strip() in ["--print-c", "--print-i"]:
+                flags += [args[3].strip]
+    
+    if flags != []:
+        write_subleqp(args[1], args[2], flags = flags)
+    
+    else:
+        write_subleqp(args[1], args[2])
 
 
 if __name__ == '__main__':
