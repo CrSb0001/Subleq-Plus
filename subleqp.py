@@ -48,7 +48,7 @@ def write_subleqp(src_file, dest_file, /, flags = ["--print-c"]):
         write_slc(slc_file, mem)
         slc_file.close()
     
-    subleqp_vm.SubleqpVM.execute(mem)
+    subleqp_vm.SubleqpVM(flags[0]).execute(mem)
 
 def main(args):
     # Usage: subleqp.py src_file dest_file [--print-c | --print-i]
