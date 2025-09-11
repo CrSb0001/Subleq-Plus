@@ -10,14 +10,19 @@
 try:
     from getch import getch, getche         # Linux
 except ImportError:
-    from msvcrt import getch, getche        # Windows
+    try:
+        from msvcrt import getch, getche        # Windows
+    except ImportError:
+        getch, getche = input, input
 
 class SubleqpVM:
+    def __init__(self, comp_flag = "--print-c"):
+        self.flag = comp_flag
+    
     @staticmethod 
     def execute(mem):
         pointer = 0
         running = True
-        input_buffer = []
 
         def out_of_bounds(where):
             if mem[abs(where)] <0:
@@ -29,7 +34,6 @@ class SubleqpVM:
                 a = mem[pointer]
                 b = mem[pointer+1]
                 c = mem[pointer+2]
-#                print(pointer, ":", a, b, c, flush=True)
                 if a == -1 or a == 0:      # input
                     # if not input_buffer:
                     #    input_buffer.extend(list(input()))
@@ -51,9 +55,16 @@ class SubleqpVM:
                 elif b == -1:    # output
                     if a < 0:
                         out_of_bounds(a)
-                        print(chr(mem[mem[abs(a)]]), end="", flush=True)
+                        if self.comp_flag == "--print-c":
+                            print(chr(mem[mem[abs(a)]]), end="", flush=True)
+                        elif self.comp_flag == "--print-i":
+                            print(mem[mem[abs(a)]], end = "", flush = True)
+                        
                     else:
-                        print(chr(mem[a]), end="", flush=True)
+                        if self.comp_flag == "--print-c":
+                            print(chr(mem[a]), end="", flush=True)
+                        elif self.comp_flag == "--print-i":
+                            print(mem[a], end = "", flush = True)
                 else:
                     if b >= 0:
                         if a >= 0:
