@@ -1,0 +1,84 @@
+# Take in input. If .inp - 1 <= 0, then it isn't
+# prime. Else, if .inp - 3 <= 0, then we have
+# encountered one of the first 2 primes.
+
+! inp
+
+dec inp False
+inc inp
+
+three inp True
+neg3 inp
+
+inp zero
+zero _inp
+
+zero zero checkDiv
+
+########################
+# Subroutine `checkDiv`.
+#
+# Checks if (.inp := .inp - .div) <= 0. If it is,
+# we jump to subroutine `_checkDiv`, else loop back
+# to `checkDiv`.
+
+checkDiv: div inp _checkDiv
+zero zero checkDiv
+
+#########################
+# Subroutine `_checkDiv`.
+#
+# If .inp now is equal to, but not less than 0,
+# then we print "F" and end the program.
+# Else, jump to subroutine `incDiv`
+
+_checkDiv:inp _zero
+
+zero _zero False
+_zero
+zero zero incDiv
+
+######################
+# Subroutine `incDiv`.
+#
+# Increments the current divisor .div
+# Now, if .div == .inp, then .inp is prime.
+# Else, jump back to subroutine `checkDiv`
+
+incDiv: inp
+_inp zero
+zero inp
+zero
+
+inc div
+div _inp True
+_inp
+inp zero
+zero inp
+
+zero zero checkDiv
+
+###
+
+False: F !
+zero zero !
+
+True: T !
+zero zero !
+
+
+.inp: 0
+._inp: 0
+
+.div: 2
+
+.zero: 0
+._zero: 0
+
+.inc: -1
+.dec: 1
+.three: 3
+.neg3: -3
+
+.F: 70
+.T: 84
